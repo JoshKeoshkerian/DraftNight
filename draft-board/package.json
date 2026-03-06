@@ -1,0 +1,16 @@
+{
+  "name": "draft-board",
+  "version": "1.0.0",
+  "description": "Live intramural softball draft board",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["draft", "softball", "live"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1"
+  }
+}

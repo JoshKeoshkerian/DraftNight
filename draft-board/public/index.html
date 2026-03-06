@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draft Night - Softball Draft Board</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🥎 Draft Night - Softball Draft Board</h1>
+  </header>
+  
+  <main class="draft-container">
+    <!-- Draft Controls -->
+    <div class="controls">
+      <div class="control-group">
+        <label for="playerSelect">Select Player:</label>
+        <select id="playerSelect">
+          <option value="">-- Choose Player --</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label for="teamSelect">Select Team:</label>
+        <select id="teamSelect">
+          <option value="">-- Choose Team --</option>
+          <option value="team1">Team Thomas & Kobe</option>
+          <option value="team2">Team Nick & Cam</option>
+        </select>
+      </div>
+      
+      <button id="draftBtn" class="btn btn-primary">Draft Player</button>
+      <button id="undoBtn" class="btn btn-secondary">Undo Last Pick</button>
+    </div>
+    
+    <!-- Draft Board -->
+    <div class="board">
+      <!-- Available Players -->
+      <div class="column available-column">
+        <h2>Available Players</h2>
+        <div id="availablePlayers" class="player-list"></div>
+      </div>
+      
+      <!-- Team 1 -->
+      <div class="column team-column team1-column">
+        <h2>Team Thomas & Kobe</h2>
+        <div id="team1Players" class="player-list"></div>
+      </div>
+      
+      <!-- Team 2 -->
+      <div class="column team-column team2-column">
+        <h2>Team Nick & Cam</h2>
+        <div id="team2Players" class="player-list"></div>
+      </div>
+    </div>
+  </main>
+  
+  <footer>
+    <p>Connected: <span id="status" class="status-disconnected">Disconnected</span></p>
+  </footer>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
