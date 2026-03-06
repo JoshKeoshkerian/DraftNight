@@ -112,8 +112,7 @@ function updateUI(draftState) {
   selectedPlayerDisplay.textContent = selectedPlayer || 'None';
   
   draftState.availablePlayers.forEach(player => {
-    const playerDiv = document.createElement('button');
-    playerDiv.type = 'button';
+    const playerDiv = document.createElement('div');
     playerDiv.className = 'player-item';
     if (player === selectedPlayer) {
       playerDiv.classList.add('selected');
@@ -126,19 +125,25 @@ function updateUI(draftState) {
       </div>
       <div class="player-name">${player}</div>
       <div class="player-draft-overlay">
-        <button type="button">Draft</button>
+        <button type="button" class="draft-confirm">Draft</button>
       </div>
     `;
     
+    // Main card click - select or draft if already selected
     playerDiv.onclick = (e) => {
-      e.stopPropagation();
-      if (selectedPlayer === player) {
-        // If already selected, draft on click
-        draftPlayerAction(player);
-      } else {
-        // Otherwise just select
-        selectPlayerFromGrid(player);
+      if (e.target.closest('.draft-confirm')) {
+        return; // Let the draft button handle it
       }
+      e.stopPropagation();
+      // Select only; drafting happens from the explicit Draft button.
+      selectPlayerFromGrid(player, playerDiv);
+    };
+    
+    // Draft confirm button click
+    const draftBtn = playerDiv.querySelector('.draft-confirm');
+    draftBtn.onclick = (e) => {
+      e.stopPropagation();
+      draftPlayerAction(player);
     };
     
     availablePlayersEl.appendChild(playerDiv);
@@ -185,9 +190,16 @@ function updateUI(draftState) {
 }
 
 // Select player from available photo grid
-function selectPlayerFromGrid(player) {
+function selectPlayerFromGrid(player, selectedCard) {
   selectedPlayer = player;
   selectedPlayerDisplay.textContent = player;
+
+  // Update selected styling immediately without waiting for socket state refresh.
+  const allCards = availablePlayersEl.querySelectorAll('.player-item');
+  allCards.forEach((card) => card.classList.remove('selected'));
+  if (selectedCard) {
+    selectedCard.classList.add('selected');
+  }
 }
 
 // Draft the selected player
@@ -208,27 +220,6 @@ function draftPlayerAction(player) {
   selectedPlayerDisplay.textContent = 'None';
 }
 
-// Draft player button click
-draftBtn.addEventListener('click', () => {
-  const player = selectedPlayer;
-  
-  if (!player) {
-    alert('Please select a player card');
-    return;
-  }
-  
-  // Save last picked player for highlighting
-  lastPickedPlayer = player;
-  
-  // Emit draft event to server (team is determined automatically)
-  socket.emit('draftPlayer', { player });
-  
-  // Reset selection
-  selectedPlayer = null;
-  selectedPlayerDisplay.textContent = 'None';
-  draftBtn.disabled = true;
-});
-
 // Undo last pick button click
 undoBtn.addEventListener('click', () => {
   socket.emit('undoLastPick');
@@ -236,14 +227,17 @@ undoBtn.addEventListener('click', () => {
 });
 
 // Reset draft button click
-resetBtn.addEventListener('click', () => {
-  if (confirm('Are you sure? This will reset the entire draft.')) {
-    socket.emit('resetDraft');
-    selectedPlayer = null;
-    selectedPlayerDisplay.textContent = 'None';
-    draftBtn.disabled = true;
-  }
-});
+if (resetBtn) {
+  resetBtn.addEventListener('click', () => {
+    if (confirm('Are you sure? This will reset the entire draft.')) {
+      socket.emit('resetDraft');
+      selectedPlayer = null;
+      selectedPlayerDisplay.textContent = 'None';
+    }
+  });
+} else {
+  console.error('resetBtn not found in DOM');
+}
 
 // Allow Enter key to draft
 document.addEventListener('keypress', (e) => {
