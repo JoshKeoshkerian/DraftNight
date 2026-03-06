@@ -45,8 +45,40 @@ let draftState = {
     name: "Nick & Cam",
     players: []
   },
-  draftHistory: [] // Track picks for undo functionality
+  draftHistory: [], // Track picks for undo functionality
+  speedballWinner: null, // Which team won speedball (gets first pick)
+  currentPickNumber: 0, // Current pick in the draft (0 = not started)
+  currentTeam: null // Which team's turn it is
 };
+
+// Calculate whose turn it is based on snake draft
+function getCurrentTeam(pickNumber, speedballWinner) {
+  if (pickNumber === 0) return null;
+  
+  // Snake draft pattern: 1, 2-2, 2-2, 2-2...
+  // Pick 1: speedball winner
+  // Picks 2-3: other team
+  // Picks 4-5: speedball winner
+  // Picks 6-7: other team
+  // And so on...
+  
+  if (pickNumber === 1) {
+    return speedballWinner;
+  }
+  
+  // For picks 2+, determine the round
+  const adjustedPick = pickNumber - 1; // picks 2+ become 1+
+  const pairNumber = Math.ceil(adjustedPick / 2); // which pair (1st pair, 2nd pair, etc.)
+  
+  // Odd pairs go to the team that didn't win speedball, even pairs to winner
+  const otherTeam = speedballWinner === 'team1' ? 'team2' : 'team1';
+  
+  if (pairNumber % 2 === 1) {
+    return otherTeam;
+  } else {
+    return speedballWinner;
+  }
+}
 
 // Socket.io connection
 io.on('connection', (socket) => {
@@ -55,9 +87,31 @@ io.on('connection', (socket) => {
   // Send current draft state to newly connected client
   socket.emit('draftState', draftState);
   
+  // Handle speedball winner selection
+  socket.on('setSpeedballWinner', (winner) => {
+    if (draftState.speedballWinner !== null) {
+      socket.emit('error', { message: 'Speedball winner already set' });
+      return;
+    }
+    
+    draftState.speedballWinner = winner;
+    draftState.currentPickNumber = 1;
+    draftState.currentTeam = getCurrentTeam(1, winner);
+    
+    io.emit('draftState', draftState);
+  });
+  
   // Handle draft pick
   socket.on('draftPlayer', (data) => {
-    const { player, team } = data;
+    const { player } = data;
+    
+    // Check if draft has started
+    if (!draftState.speedballWinner) {
+      socket.emit('error', { message: 'Must select speedball winner first' });
+      return;
+    }
+    
+    const team = draftState.currentTeam;
     
     // Check if player is available
     const playerIndex = draftState.availablePlayers.indexOf(player);
@@ -78,6 +132,10 @@ io.on('connection', (socket) => {
     
     // Add to history for undo
     draftState.draftHistory.push({ player, team });
+    
+    // Move to next pick
+    draftState.currentPickNumber++;
+    draftState.currentTeam = getCurrentTeam(draftState.currentPickNumber, draftState.speedballWinner);
     
     // Broadcast updated state to all clients
     io.emit('draftState', draftState);
@@ -111,7 +169,56 @@ io.on('connection', (socket) => {
     draftState.availablePlayers.push(player);
     draftState.availablePlayers.sort(); // Keep alphabetically sorted
     
+    // Move back one pick
+    draftState.currentPickNumber--;
+    draftState.currentTeam = getCurrentTeam(draftState.currentPickNumber, draftState.speedballWinner);
+    
     // Broadcast updated state to all clients
+    io.emit('draftState', draftState);
+  });
+  
+  // Handle draft reset
+  socket.on('resetDraft', () => {
+    // Reset to initial state
+    draftState = {
+      availablePlayers: [
+        "Jack Oliver",
+        "Anthony Ibarra",
+        "Jacob C",
+        "Victor",
+        "Ryan",
+        "Josh",
+        "Elias",
+        "Jo",
+        "Mike",
+        "Kris",
+        "Guten",
+        "Drew",
+        "Timo",
+        "Keyserling",
+        "Chase Place",
+        "Kai Woods",
+        "Fiorni",
+        "Russell",
+        "Kyler",
+        "Tom",
+        "Tyler"
+      ],
+      team1: {
+        name: "Thomas & Kobe",
+        players: []
+      },
+      team2: {
+        name: "Nick & Cam",
+        players: []
+      },
+      draftHistory: [],
+      speedballWinner: null,
+      currentPickNumber: 0,
+      currentTeam: null
+    };
+    
+    // Broadcast reset state to all clients
     io.emit('draftState', draftState);
   });
   

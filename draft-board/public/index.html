@@ -7,58 +7,68 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>🥎 Draft Night - Softball Draft Board</h1>
-  </header>
-  
-  <main class="draft-container">
-    <!-- Draft Controls -->
-    <div class="controls">
-      <div class="control-group">
-        <label for="playerSelect">Select Player:</label>
-        <select id="playerSelect">
-          <option value="">-- Choose Player --</option>
-        </select>
+  <!-- Speedball Winner Selection Screen -->
+  <div id="speedballScreen" class="speedball-screen">
+    <div class="speedball-container">
+      <h1 class="speedball-title">🥎 WHO WON SPEEDBALL? 🥎</h1>
+      <p class="speedball-subtitle">The winner gets first pick in the draft</p>
+      <div class="speedball-buttons">
+        <button class="speedball-btn team1-btn" onclick="selectSpeedballWinner('team1')">
+          <span class="team-name">Thomas & Kobe</span>
+        </button>
+        <button class="speedball-btn team2-btn" onclick="selectSpeedballWinner('team2')">
+          <span class="team-name">Nick & Cam</span>
+        </button>
       </div>
-      
-      <div class="control-group">
-        <label for="teamSelect">Select Team:</label>
-        <select id="teamSelect">
-          <option value="">-- Choose Team --</option>
-          <option value="team1">Team Thomas & Kobe</option>
-          <option value="team2">Team Nick & Cam</option>
-        </select>
-      </div>
-      
-      <button id="draftBtn" class="btn btn-primary">Draft Player</button>
-      <button id="undoBtn" class="btn btn-secondary">Undo Last Pick</button>
     </div>
+  </div>
+  
+  <!-- Main Draft Board (hidden until speedball winner selected) -->
+  <div id="draftBoard" class="hidden">
+    <header>
+      <h1>🥎 Draft Night - Softball Draft Board</h1>
+      <div class="current-pick-banner" id="currentPickBanner"></div>
+      <button id="resetBtn" class="btn btn-reset">← Back to Speedball</button>
+    </header>
     
-    <!-- Draft Board -->
-    <div class="board">
-      <!-- Available Players -->
-      <div class="column available-column">
-        <h2>Available Players</h2>
-        <div id="availablePlayers" class="player-list"></div>
+    <main class="draft-container">
+      <!-- Draft Controls -->
+      <div class="controls">
+        <div class="selection-status">
+          <p class="selection-label">Selected Player</p>
+          <p id="selectedPlayerDisplay" class="selection-value">None</p>
+        </div>
+        
+        <button id="undoBtn" class="btn btn-secondary">Undo Last Pick</button>
       </div>
       
-      <!-- Team 1 -->
-      <div class="column team-column team1-column">
-        <h2>Team Thomas & Kobe</h2>
-        <div id="team1Players" class="player-list"></div>
+      <!-- Draft Board -->
+      <div class="board">
+        <!-- Available Players -->
+        <div class="column available-column">
+          <h2>Available Players</h2>
+          <p class="column-tip">Click a player photo to select</p>
+          <div id="availablePlayers" class="player-list"></div>
+        </div>
+        
+        <!-- Team 1 -->
+        <div class="column team-column team1-column">
+          <h2>Team Thomas & Kobe</h2>
+          <div id="team1Players" class="player-list"></div>
+        </div>
+        
+        <!-- Team 2 -->
+        <div class="column team-column team2-column">
+          <h2>Team Nick & Cam</h2>
+          <div id="team2Players" class="player-list"></div>
+        </div>
       </div>
-      
-      <!-- Team 2 -->
-      <div class="column team-column team2-column">
-        <h2>Team Nick & Cam</h2>
-        <div id="team2Players" class="player-list"></div>
-      </div>
-    </div>
-  </main>
-  
-  <footer>
-    <p>Connected: <span id="status" class="status-disconnected">Disconnected</span></p>
-  </footer>
+    </main>
+    
+    <footer>
+      <p>Connected: <span id="status" class="status-disconnected">Disconnected</span></p>
+    </footer>
+  </div>
   
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
