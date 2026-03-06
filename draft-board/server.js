@@ -32,7 +32,6 @@ let draftState = {
     "Chase Place",
     "Kai Woods",
     "Fiorni",
-    "Russell",
     "Kyler",
     "Tom",
     "Tyler"
@@ -199,7 +198,6 @@ io.on('connection', (socket) => {
         "Chase Place",
         "Kai Woods",
         "Fiorni",
-        "Russell",
         "Kyler",
         "Tom",
         "Tyler"
