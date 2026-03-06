@@ -229,27 +229,6 @@ draftBtn.addEventListener('click', () => {
   draftBtn.disabled = true;
 });
 
-// Draft player button click
-draftBtn.addEventListener('click', () => {
-  const player = selectedPlayer;
-  
-  if (!player) {
-    alert('Please select a player card');
-    return;
-  }
-  
-  // Save last picked player for highlighting
-  lastPickedPlayer = player;
-  
-  // Emit draft event to server (team is determined automatically)
-  socket.emit('draftPlayer', { player });
-  
-  // Reset selection
-  selectedPlayer = null;
-  selectedPlayerDisplay.textContent = 'None';
-  draftBtn.disabled = true;
-});
-
 // Undo last pick button click
 undoBtn.addEventListener('click', () => {
   socket.emit('undoLastPick');
@@ -269,6 +248,6 @@ resetBtn.addEventListener('click', () => {
 // Allow Enter key to draft
 document.addEventListener('keypress', (e) => {
   if (e.key === 'Enter' && selectedPlayer) {
-    draftBtn.click();
+    draftPlayerAction(selectedPlayer);
   }
 });
