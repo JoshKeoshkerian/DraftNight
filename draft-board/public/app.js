@@ -12,9 +12,13 @@ const team1PlayersEl = document.getElementById('team1Players');
 const team2PlayersEl = document.getElementById('team2Players');
 const statusEl = document.getElementById('status');
 const currentPickBanner = document.getElementById('currentPickBanner');
+const halftimeOverlay = document.getElementById('halftimeOverlay');
+const halftimeTimer = document.getElementById('halftimeTimer');
 
 let lastPickedPlayer = null;
 let selectedPlayer = null;
+let halftimeTick = null;
+let halftimeActive = false;
 
 // Use explicit filenames when a player's uploaded image doesn't match the slug format.
 const PLAYER_IMAGE_MAP = {
@@ -73,7 +77,8 @@ socket.on('draftState', (draftState) => {
     speedballScreen.classList.remove('hidden');
     draftBoard.classList.add('hidden');
   }
-  
+
+  updateHalftimeOverlay(draftState);
   updateUI(draftState);
 });
 
@@ -98,6 +103,39 @@ function updateCurrentPickBanner(draftState) {
   
   currentPickBanner.textContent = `Pick #${draftState.currentPickNumber} - ${teamName}'s Turn`;
   currentPickBanner.style.borderColor = color;
+}
+
+function formatRemainingTime(msRemaining) {
+  const totalSeconds = Math.max(0, Math.ceil(msRemaining / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function updateHalftimeOverlay(draftState) {
+  if (halftimeTick) {
+    clearInterval(halftimeTick);
+    halftimeTick = null;
+  }
+
+  halftimeActive = Boolean(draftState.halftimeBreakActive);
+
+  if (!halftimeActive || !draftState.halftimeBreakEndsAt) {
+    halftimeOverlay.classList.add('hidden');
+    halftimeTimer.textContent = '1:00';
+    return;
+  }
+
+  halftimeOverlay.classList.remove('hidden');
+
+  const endAt = draftState.halftimeBreakEndsAt;
+  const renderCountdown = () => {
+    const msRemaining = endAt - Date.now();
+    halftimeTimer.textContent = formatRemainingTime(msRemaining);
+  };
+
+  renderCountdown();
+  halftimeTick = setInterval(renderCountdown, 250);
 }
 
 // Update UI with current draft state
@@ -208,6 +246,10 @@ function draftPlayerAction(player) {
     alert('Please select a player');
     return;
   }
+
+  if (halftimeActive) {
+    return;
+  }
   
   // Save last picked player for highlighting
   lastPickedPlayer = player;
@@ -222,6 +264,10 @@ function draftPlayerAction(player) {
 
 // Undo last pick button click
 undoBtn.addEventListener('click', () => {
+  if (halftimeActive) {
+    return;
+  }
+
   socket.emit('undoLastPick');
   lastPickedPlayer = null;
 });

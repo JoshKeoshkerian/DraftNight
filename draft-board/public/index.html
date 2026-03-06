@@ -69,6 +69,16 @@
       <p>Connected: <span id="status" class="status-disconnected">Disconnected</span></p>
     </footer>
   </div>
+
+  <!-- Halftime Break Overlay -->
+  <div id="halftimeOverlay" class="halftime-overlay hidden" aria-live="polite">
+    <div class="halftime-card">
+      <h2 class="halftime-title">HALFTIME CHALLENGE</h2>
+      <p class="halftime-text">you have one minute to shotgun a beer, if not you die</p>
+      <p class="halftime-timer-label">Time Remaining</p>
+      <p id="halftimeTimer" class="halftime-timer">1:00</p>
+    </div>
+  </div>
   
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
