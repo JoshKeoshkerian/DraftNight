@@ -558,3 +558,29 @@ footer {
     font-size: 3rem;
   }
 }
+
+/* Credit and Footer Styles */
+.speedball-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.speedball-footer p,
+.credit-text {
+  font-size: 0.95rem;
+  color: #adb5bd;
+  text-align: center;
+  font-style: italic;
+}
+
+footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+footer .credit-text {
+  margin-top: 0.5rem;
+}
